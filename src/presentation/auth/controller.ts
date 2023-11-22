@@ -1,18 +1,21 @@
 import type { RequestHandler } from "express";
-import { SignUpUserDTO } from "../../domain";
+import { AuthRepository, SignUpUserDTO } from "../../domain";
 
 export class AuthController {
-  constructor() {}
+  constructor(private readonly authRepository: AuthRepository) {}
 
   signUpUser: RequestHandler = (req, res) => {
-    const [error, userDTO] = SignUpUserDTO.create(req.body);
+    const [error, signUpUserDTO] = SignUpUserDTO.create(req.body);
 
-    if (error) {
+    if (error || !signUpUserDTO) {
       res.status(400).json({ error });
       return;
     }
 
-    res.status(201).json(userDTO);
+    this.authRepository
+      .signUp(signUpUserDTO)
+      .then((user) => res.json(user))
+      .catch((error) => res.status(500).json(error));
   };
 
   signInUser: RequestHandler = (req, res) => {
