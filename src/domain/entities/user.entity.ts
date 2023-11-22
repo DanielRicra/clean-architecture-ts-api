@@ -4,7 +4,7 @@ export class UserEntity {
     public name: string,
     public email: string,
     public password: string,
-    public role: { id: string; name: string }[],
+    public roles: { id: string; name: string }[],
     public imgUrl?: string
   ) {}
 }
