@@ -1,3 +1,4 @@
+import prisma from "../../data/sqlite/sqlite-database";
 import {
   AuthDatasource,
   CustomError,
@@ -6,13 +7,31 @@ import {
 } from "../../domain";
 
 export class AuthDataSourceImpl implements AuthDatasource {
-  signUp(signUpUserDTO: SignUpUserDTO): Promise<UserEntity> {
+  async signUp(signUpUserDTO: SignUpUserDTO): Promise<UserEntity> {
     const { email, name, password } = signUpUserDTO;
 
     try {
-      return Promise.resolve(
-        new UserEntity("12se", name, email, password, ["ADMIN"])
-      );
+      const existsUser = await prisma.user.findFirst({ where: { email } });
+
+      if (existsUser) throw CustomError.badRequest("Email already taken");
+
+      const user = await prisma.user.create({
+        data: {
+          name,
+          email,
+          password,
+          roles: {
+            connect: {
+              name: "USER",
+            },
+          },
+        },
+        include: {
+          roles: true,
+        },
+      });
+
+      return new UserEntity(user.id, name, email, password, user.roles);
     } catch (error) {
       if (error instanceof CustomError) {
         throw error;
