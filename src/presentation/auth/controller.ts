@@ -1,5 +1,6 @@
 import type { RequestHandler, Response } from "express";
 import { AuthRepository, CustomError, SignUpUserDTO } from "../../domain";
+import { JwtAdapter } from "../../config";
 
 export class AuthController {
   constructor(private readonly authRepository: AuthRepository) {}
@@ -22,7 +23,12 @@ export class AuthController {
 
     this.authRepository
       .signUp(signUpUserDTO)
-      .then((user) => res.json(user))
+      .then(async (user) => {
+        res.json({
+          user,
+          token: await JwtAdapter.generateToken({ id: user.id }),
+        });
+      })
       .catch((error) => this.handleError(error, res));
   };
 
