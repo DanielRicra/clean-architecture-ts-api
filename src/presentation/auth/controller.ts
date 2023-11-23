@@ -1,5 +1,10 @@
 import type { RequestHandler, Response } from "express";
-import { AuthRepository, CustomError, SignUpUserDTO } from "../../domain";
+import {
+  AuthRepository,
+  CustomError,
+  SignUpUser,
+  SignUpUserDTO,
+} from "../../domain";
 import { JwtAdapter } from "../../config";
 
 export class AuthController {
@@ -21,14 +26,9 @@ export class AuthController {
       return;
     }
 
-    this.authRepository
-      .signUp(signUpUserDTO)
-      .then(async (user) => {
-        res.json({
-          user,
-          token: await JwtAdapter.generateToken({ id: user.id }),
-        });
-      })
+    new SignUpUser(this.authRepository)
+      .execute(signUpUserDTO)
+      .then((data) => res.json(data))
       .catch((error) => this.handleError(error, res));
   };
 
