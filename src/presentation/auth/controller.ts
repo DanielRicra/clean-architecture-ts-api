@@ -1,8 +1,16 @@
-import type { RequestHandler } from "express";
-import { AuthRepository, SignUpUserDTO } from "../../domain";
+import type { RequestHandler, Response } from "express";
+import { AuthRepository, CustomError, SignUpUserDTO } from "../../domain";
 
 export class AuthController {
   constructor(private readonly authRepository: AuthRepository) {}
+
+  private handleError = (error: unknown, res: Response) => {
+    if (error instanceof CustomError) {
+      return res.status(error.statusCode).json({ error: error.message });
+    }
+
+    return res.status(500).json({ error: "Internal server error" });
+  };
 
   signUpUser: RequestHandler = (req, res) => {
     const [error, signUpUserDTO] = SignUpUserDTO.create(req.body);
@@ -15,7 +23,7 @@ export class AuthController {
     this.authRepository
       .signUp(signUpUserDTO)
       .then((user) => res.json(user))
-      .catch((error) => res.status(500).json(error));
+      .catch((error) => this.handleError(error, res));
   };
 
   signInUser: RequestHandler = (req, res) => {
