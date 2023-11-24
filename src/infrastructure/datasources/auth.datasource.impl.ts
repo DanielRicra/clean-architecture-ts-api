@@ -3,6 +3,7 @@ import prisma from "../../data/sqlite/sqlite-database";
 import {
   AuthDatasource,
   CustomError,
+  SignInUserDTO,
   SignUpUserDTO,
   UserEntity,
 } from "../../domain";
@@ -16,6 +17,33 @@ export class AuthDataSourceImpl implements AuthDatasource {
     private readonly hashPassword: HashFunction = BcryptAdapter.hash,
     private readonly comparePassword: CompareFunction = BcryptAdapter.compare
   ) {}
+
+  async signIn(signInUserDTO: SignInUserDTO): Promise<UserEntity> {
+    const { email, password } = signInUserDTO;
+
+    try {
+      const user = await prisma.user.findFirst({
+        where: { email },
+        include: {
+          roles: true,
+        },
+      });
+
+      if (!user) throw CustomError.badRequest("Invalid credentials");
+
+      const isValidPassword = this.comparePassword(password, user.password);
+
+      if (!isValidPassword) throw CustomError.badRequest("Invalid credentials");
+
+      return UserMapper.userEntityFromObject(user);
+    } catch (error) {
+      if (error instanceof CustomError) {
+        throw error;
+      }
+
+      throw CustomError.internalServerError();
+    }
+  }
 
   async signUp(signUpUserDTO: SignUpUserDTO): Promise<UserEntity> {
     const { email, name, password } = signUpUserDTO;
