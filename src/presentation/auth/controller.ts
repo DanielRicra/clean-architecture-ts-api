@@ -2,10 +2,11 @@ import type { RequestHandler, Response } from "express";
 import {
   AuthRepository,
   CustomError,
+  SignInUser,
+  SignInUserDTO,
   SignUpUser,
   SignUpUserDTO,
 } from "../../domain";
-import { JwtAdapter } from "../../config";
 
 export class AuthController {
   constructor(private readonly authRepository: AuthRepository) {}
@@ -33,6 +34,16 @@ export class AuthController {
   };
 
   signInUser: RequestHandler = (req, res) => {
-    res.json("signInUser controller");
+    const [error, signInUserDTO] = SignInUserDTO.create(req.body);
+
+    if (error || !signInUserDTO) {
+      res.status(400).json({ error });
+      return;
+    }
+
+    new SignInUser(this.authRepository)
+      .execute(signInUserDTO)
+      .then((data) => res.json(data))
+      .catch((error) => this.handleError(error, res));
   };
 }
