@@ -1,6 +1,5 @@
 import { RequestHandler, Response } from "express";
-import { CustomError, UserRepository } from "../../domain";
-import { GetUsers } from "../../domain/use-cases/user/get-users.use-case";
+import { CustomError, GetUser, GetUsers, UserRepository } from "../../domain";
 
 export class UserController {
   constructor(private readonly userRepository: UserRepository) {}
@@ -16,6 +15,13 @@ export class UserController {
   getUsers: RequestHandler = (req, res) => {
     new GetUsers(this.userRepository)
       .execute()
+      .then((data) => res.json(data))
+      .catch((error) => this.handleError(error, res));
+  };
+
+  getUser: RequestHandler = (req, res) => {
+    new GetUser(this.userRepository)
+      .execute(req.params.id)
       .then((data) => res.json(data))
       .catch((error) => this.handleError(error, res));
   };
