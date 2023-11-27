@@ -18,7 +18,10 @@ export class UserDatasourceImpl implements UserDatasource {
 
   async getUser(id: string): Promise<UserEntity> {
     try {
-      const user = await prisma.user.findFirst({ where: { id } });
+      const user = await prisma.user.findFirst({
+        where: { id },
+        include: { roles: true },
+      });
 
       if (!user) throw CustomError.notFound("User not found");
 
