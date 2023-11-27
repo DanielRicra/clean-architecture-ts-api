@@ -13,6 +13,7 @@ export class UserRouter {
     const controller = new UserController(repository);
 
     router.get("/", [AuthMiddleware.validateJwt], controller.getUsers);
+    router.get("/:id", controller.getUser)
 
     return router;
   }
