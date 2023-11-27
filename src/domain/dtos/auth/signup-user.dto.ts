@@ -13,9 +13,9 @@ export class SignUpUserDTO {
     if (!name) return ["Missing name"];
     if (!email) return ["Missing email"];
     if (!password) return ["Missing password"];
-    if (typeof name !== "string") return ["Name must a string"];
-    if (typeof email !== "string") return ["Email must a string"];
-    if (typeof password !== "string") return ["Password must a string"];
+    if (typeof name !== "string") return ["Name must be a string"];
+    if (typeof email !== "string") return ["Email must be a string"];
+    if (typeof password !== "string") return ["Password must be a string"];
     if (!Validators.email.test(email)) return ["Email is not valid"];
     if (password.length < 6)
       return ["Password must be greater than 6 characters"];
