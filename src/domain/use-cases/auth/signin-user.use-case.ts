@@ -5,7 +5,7 @@ import type { SignToken, UserToken } from "../../interfaces-types";
 import { AuthRepository } from "../../repositories/auth.repository";
 
 interface SignInUserUseCase {
-  execute(signInUSerDTO: SignInUserDTO): Promise<UserToken>;
+  execute(signInUserDTO: SignInUserDTO): Promise<UserToken>;
 }
 
 export class SignInUser implements SignInUserUseCase {
