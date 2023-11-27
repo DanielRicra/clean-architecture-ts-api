@@ -13,3 +13,5 @@ export * from "./repositories/user.repository";
 
 export * from "./use-cases/auth/signup-user.use-case";
 export * from "./use-cases/auth/signin-user.use-case";
+export * from "./use-cases/user/get-users.use-case";
+export * from "./use-cases/user/get-user.use-case";
