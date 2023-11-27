@@ -3,8 +3,8 @@ export class UserEntity {
     public id: string,
     public name: string,
     public email: string,
-    public password: string,
     public roles: { id: string; name: string }[],
+    public password?: string,
     public imgUrl?: string
   ) {}
 }
