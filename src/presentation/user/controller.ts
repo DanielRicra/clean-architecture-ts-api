@@ -1,5 +1,12 @@
 import { RequestHandler, Response } from "express";
-import { CustomError, GetUser, GetUsers, UserRepository } from "../../domain";
+import {
+  CustomError,
+  GetUser,
+  GetUsers,
+  UpdateUser,
+  UserRepository,
+} from "../../domain";
+import { UpdateUserDTO } from "../../domain/dtos/user/update-user.dto";
 
 export class UserController {
   constructor(private readonly userRepository: UserRepository) {}
@@ -22,6 +29,28 @@ export class UserController {
   getUser: RequestHandler = (req, res) => {
     new GetUser(this.userRepository)
       .execute(req.params.id)
+      .then((data) => res.json(data))
+      .catch((error) => this.handleError(error, res));
+  };
+
+  updateUser: RequestHandler = (req, res) => {
+    const { id } = req.params;
+
+    // TODO: check if it is admin too, in a middleware
+    if (req.body.user.id !== id) {
+      res.status(403).json({ error: "Forbidden operation" });
+      return;
+    }
+
+    const [error, updateUserDTO] = UpdateUserDTO.create(req.body);
+
+    if (error || !updateUserDTO) {
+      res.status(400).json({ error });
+      return;
+    }
+
+    new UpdateUser(this.userRepository)
+      .execute(id, updateUserDTO)
       .then((data) => res.json(data))
       .catch((error) => this.handleError(error, res));
   };
