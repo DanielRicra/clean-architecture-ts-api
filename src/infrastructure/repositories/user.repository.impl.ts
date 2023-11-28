@@ -12,7 +12,7 @@ export class UserRepositoryImpl implements UserRepository {
     return this.userDatasource.getUser(id);
   }
 
-  updateUser(updateUserDTO: UpdateUserDTO): Promise<UserEntity> {
-    throw new Error("Method not implemented.");
+  updateUser(id: string, updateUserDTO: UpdateUserDTO): Promise<UserEntity> {
+    return this.userDatasource.updateUser(id, updateUserDTO);
   }
 }
