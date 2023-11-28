@@ -14,6 +14,7 @@ export class UserRouter {
 
     router.get("/", [AuthMiddleware.validateJwt], controller.getUsers);
     router.get("/:id", controller.getUser)
+    router.patch("/:id", [AuthMiddleware.validateJwt], controller.updateUser)
 
     return router;
   }
