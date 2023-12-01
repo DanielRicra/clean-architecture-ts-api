@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { UserController } from "./controller";
-import { AuthMiddleware } from "../middlewares/auth.middleware";
 import { UserDatasourceImpl, UserRepositoryImpl } from "../../infrastructure";
+import { AuthMiddleware, CheckAdminOrOwnerMiddleware } from "../middlewares";
 
 export class UserRouter {
   static get routes(): Router {
@@ -13,8 +13,15 @@ export class UserRouter {
     const controller = new UserController(repository);
 
     router.get("/", [AuthMiddleware.validateJwt], controller.getUsers);
-    router.get("/:id", controller.getUser)
-    router.patch("/:id", [AuthMiddleware.validateJwt], controller.updateUser)
+    router.get("/:id", controller.getUser);
+    router.patch(
+      "/:id",
+      [
+        AuthMiddleware.validateJwt,
+        CheckAdminOrOwnerMiddleware.checkAdminOrOwner,
+      ],
+      controller.updateUser
+    );
 
     return router;
   }
