@@ -36,12 +36,6 @@ export class UserController {
   updateUser: RequestHandler = (req, res) => {
     const { id } = req.params;
 
-    // TODO: check if it is admin too, in a middleware
-    if (req.body.user.id !== id) {
-      res.status(403).json({ error: "Forbidden operation" });
-      return;
-    }
-
     const [error, updateUserDTO] = UpdateUserDTO.create(req.body);
 
     if (error || !updateUserDTO) {
