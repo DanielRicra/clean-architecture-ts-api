@@ -30,7 +30,10 @@ export class AuthMiddleware {
         return;
       }
 
-      const user = await prisma.user.findFirst({ where: { id: payload.id } });
+      const user = await prisma.user.findFirst({
+        where: { id: payload.id },
+        include: { roles: true },
+      });
 
       if (!user) {
         res.status(401).json({ error: "User not found" });
