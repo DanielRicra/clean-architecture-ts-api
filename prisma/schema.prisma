@@ -11,19 +11,126 @@ datasource db {
 }
 
 model User {
-  id       String  @id @default(uuid())
-  name     String
-  email    String  @unique
-  password String
-  imgUrl   String?
-  roles    Role[]
+  id           String      @id @default(uuid())
+  name         String
+  email        String      @unique
+  password     String
+  imgUrl       String?
+  activeStatus String      @default("ACTIVE")
+  roles        Role[]
+  groups       UserGroup[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  friendsOne             Friend[]        @relation("UserOneToFriends")
+  friendsTwo             Friend[]        @relation("UserTwoToFriends")
+  posts                  Post[]
+  comments               Comment[]
+  messages               Message[]
+  conversationsInitiated DirectMessage[] @relation("DirectMessageSender")
+  conversationsReceived  DirectMessage[] @relation("DirectMessageReceiver")
+  groupMessages          GroupMessage[]
 }
 
 model Role {
   id    String @id @default(uuid())
   name  String @unique
   users User[]
+}
+
+model Friend {
+  id          Int       @id @default(autoincrement())
+  userOneId   String
+  userTwoId   String
+  status      String    @default("PENDING")
+  blockStatus String    @default("NONE")
+  requestedAt DateTime  @default(now())
+  respondedAt DateTime?
+
+  userOne User @relation("UserOneToFriends", fields: [userOneId], references: [id], onDelete: Cascade)
+  userTwo User @relation("UserTwoToFriends", fields: [userTwoId], references: [id], onDelete: Cascade)
+}
+
+model UserGroup {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  groupId   String
+  role      String   @default("GUEST")
+  createdAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+}
+
+model Group {
+  id   String @id @default(uuid())
+  name String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members       UserGroup[]
+  groupMessages GroupMessage[]
+}
+
+model Post {
+  id            String   @id @default(uuid())
+  title         String
+  content       String?
+  attachmentUrl String?
+  authorId      String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  author   User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  comments Comment[]
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String
+  userId    String
+  postId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+}
+
+model Message {
+  id            String   @id @default(uuid())
+  content       String
+  attachmentUrl String?
+  isReaded      Boolean  @default(false)
+  senderId      String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user           User            @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  directMessages DirectMessage[]
+  groupMessages  GroupMessage[]
+}
+
+model DirectMessage {
+  id         Int     @id @default(autoincrement())
+  senderId   String?
+  receiverId String?
+  messageId  String
+
+  message  Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  sender   User?   @relation("DirectMessageSender", fields: [senderId], references: [id], onDelete: SetNull)
+  receiver User?   @relation("DirectMessageReceiver", fields: [receiverId], references: [id], onDelete: SetNull)
+}
+
+model GroupMessage {
+  id        Int    @id @default(autoincrement())
+  senderId  String
+  groupId   String
+  messageId String
+
+  message Message @relation(fields: [messageId], references: [id])
+  sender  User    @relation(fields: [senderId], references: [id])
+  group   Group   @relation(fields: [groupId], references: [id])
 }
